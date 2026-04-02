@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staff Productivity — Alpha Direct</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* ===== RESET & BASE ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F3F4F6;
+      color: #111827;
+      min-height: 100vh;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: #0B0B3B;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-title span { color: #F07F00; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-updated {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* ===== TABS ===== */
+    .tabs-bar {
+      background: #fff;
+      border-bottom: 1px solid #E5E7EB;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+    }
+
+    .tab {
+      padding: 14px 24px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #9CA3AF;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .tab:hover { color: #6B7280; }
+    .tab.active { color: #0B0B3B; border-bottom-color: #F07F00; }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #F3F4F6;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #E5E7EB;
+    }
+
+    .date-arrow {
+      padding: 6px 10px;
+      cursor: pointer;
+      color: #6B7280;
+      font-size: 14px;
+      font-weight: 700;
+      user-select: none;
+      transition: background 0.15s;
+      border: none;
+      background: none;
+      line-height: 1;
+    }
+
+    .date-arrow:hover {
+      background: #E5E7EB;
+      color: #0B0B3B;
+    }
+
+    .date-display {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0B0B3B;
+      background: #fff;
+      border-left: 1px solid #E5E7EB;
+      border-right: 1px solid #E5E7EB;
+      min-width: 140px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* ===== COMPARE TOGGLE ===== */
+    .compare-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #E5E7EB;
+      background: #fff;
+      transition: all 0.2s;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6B7280;
+    }
+
+    .compare-toggle:hover { border-color: #F07F00; color: #F07F00; }
+    .compare-toggle.active { border-color: #F07F00; background: #FFF7ED; color: #F07F00; }
+
+    .toggle-switch {
+      width: 32px;
+      height: 18px;
+      border-radius: 10px;
+      background: #D1D5DB;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .compare-toggle.active .toggle-switch { background: #F07F00; }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .compare-toggle.active .toggle-switch::after { left: 16px; }
+
+    .compare-picker { display: none; }
+    .compare-picker.visible { display: flex; align-items: center; gap: 8px; }
+
+    .compare-vs {
+      font-size: 11px;
+      font-weight: 600;
+      color: #F07F00;
+      margin-right: 4px;
+    }
+
+    /* ===== PERIOD BADGES ===== */
+    .period-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-a { background: #0B0B3B; color: #fff; }
+    .badge-b { background: #F07F00; color: #fff; }
+
+    /* ===== CONTENT ===== */
+    .content {
+      padding: 24px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ===== HERO CARDS ===== */
+    .hero-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 28px 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      flex: 1;
+    }
+
+    .hero-inner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .hero-pct {
+      font-size: 52px;
+      font-weight: 800;
+      color: #0B0B3B;
+      letter-spacing: -3px;
+      line-height: 1;
+    }
+
+    .hero-pct-orange { color: #F07F00; }
+
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hero-label {
+      font-size: 14px;
+      color: #6B7280;
+    }
+
+    .hero-trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+
+    .trend-up { background: #ECFDF5; color: #059669; }
+    .trend-down { background: #FEF2F2; color: #DC2626; }
+    .trend-same { background: #F3F4F6; color: #6B7280; }
+
+    /* ===== HERO COMPARE ===== */
+    .hero-compare {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .hero-compare-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    .hero-compare-card .period-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .hero-compare-card .hero-pct { font-size: 44px; }
+
+    /* ===== STAT CARDS ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0B0B3B;
+      letter-spacing: -1px;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-top: 4px;
+    }
+
+    .stat-card-sub {
+      font-size: 11px;
+      color: #6B7280;
+      margin-top: 2px;
+    }
+
+    .stat-compare-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .stat-compare-vs {
+      font-size: 12px;
+      color: #F07F00;
+      font-weight: 700;
+    }
+
+    /* ===== SECTION CARDS ===== */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    .section-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-red    { background: #DC2626; }
+    .dot-orange { background: #D97706; }
+    .dot-green  { background: #059669; }
+    .dot-gray   { background: #9CA3AF; }
+    .dot-navy   { background: #0B0B3B; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #374151;
+    }
+
+    .section-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9CA3AF;
+      margin-left: auto;
+    }
+
+    /* ===== DATA TABLES ===== */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 0 0 10px 0;
+    }
+
+    .data-table th:last-child { text-align: right; }
+
+    .data-table td {
+      padding: 8px 0;
+      font-size: 13px;
+      border-top: 1px solid #F3F4F6;
+      vertical-align: middle;
+    }
+
+    .name-cell { font-weight: 500; color: #111827; }
+
+    .dept-tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: #6B7280;
+      background: #F3F4F6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    .hours-cell {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: #374151;
+    }
+
+    .issue-cell { text-align: right; }
+
+    .pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .pill-red    { background: #FEF2F2; color: #DC2626; }
+    .pill-orange { background: #FFF7ED; color: #D97706; }
+    .pill-blue   { background: #EFF6FF; color: #2563EB; }
+    .pill-green  { background: #ECFDF5; color: #059669; }
+
+    .no-track-names {
+      font-size: 12px;
+      color: #9CA3AF;
+      line-height: 1.7;
+    }
+
+    .empty-table-msg {
+      color: #9CA3AF;
+      font-size: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ===== COMPARISON BOX ===== */
+    .comp-box {
+      background: #F9FAFB;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .comp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .comp-row + .comp-row { border-top: 1px solid #E5E7EB; }
+    .comp-label { font-size: 12px; color: #6B7280; }
+
+    .comp-vals {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .comp-old {
+      color: #9CA3AF;
+      text-decoration: line-through;
+      font-weight: 500;
+    }
+
+    .comp-arrow { color: #9CA3AF; }
+    .comp-new { font-weight: 700; }
+    .comp-new.up { color: #059669; }
+    .comp-new.down { color: #DC2626; }
+
+    /* ===== CHARTS ===== */
+    .chart-area {
+      background: #F9FAFB;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 160px;
+      padding: 16px 20px 0;
+    }
+
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .chart-bar-group {
+      width: 100%;
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 100%;
+    }
+
+    .chart-bar {
+      border-radius: 3px 3px 0 0;
+      min-height: 3px;
+      transition: height 0.4s ease;
+    }
+
+    .chart-col > .chart-bar {
+      width: 100%;
+    }
+
+    .chart-bar-group .chart-bar {
+      flex: 1;
+    }
+
+    .chart-bar-navy   { background: #0B0B3B; }
+    .chart-bar-orange  { background: #F07F00; }
+
+    .chart-pct {
+      font-size: 9px;
+      font-weight: 700;
+      color: #6B7280;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+
+    .chart-pct-sm { font-size: 8px; }
+
+    .chart-label-row {
+      display: flex;
+      gap: 4px;
+      padding: 8px 20px 12px;
+      border-top: 1px solid #E5E7EB;
+    }
+
+    .chart-label {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #9CA3AF;
+    }
+
+    .chart-label.today {
+      color: #F07F00;
+      font-weight: 700;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      padding: 0 20px 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6B7280;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .legend-dot-navy   { background: #0B0B3B; }
+    .legend-dot-orange { background: #F07F00; }
+
+    /* ===== DEPARTMENT BARS ===== */
+    .dept-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .dept-row + .dept-row { border-top: 1px solid #F3F4F6; }
+
+    .dept-name {
+      width: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      flex-shrink: 0;
+    }
+
+    .dept-bars-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .dept-bar-bg {
+      height: 18px;
+      background: #F3F4F6;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .dept-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    .dept-bar-fill-b {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+      opacity: 0.7;
+    }
+
+    .dept-pct {
+      width: 45px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0B0B3B;
+      flex-shrink: 0;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 11px;
+      color: #9CA3AF;
+      border-top: 1px solid #E5E7EB;
+      margin-top: 20px;
+      background: #fff;
+    }
+
+    .footer span { color: #F07F00; font-weight: 600; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .content { padding: 16px; }
+      .hero-row, .hero-compare { flex-direction: column; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .hero-pct { font-size: 40px; }
+      .topbar, .tabs-bar { padding-left: 16px; padding-right: 16px; }
+      .tab { padding: 12px 14px; font-size: 12px; }
+      .filter-bar { flex-wrap: wrap; }
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9CA3AF;
+    }
+
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-text { font-size: 14px; font-weight: 500; }
+    .empty-state-sub  { font-size: 12px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <div class="topbar">
+    <div class="topbar-title">Staff Productivity — <span>Alpha Direct</span></div>
+    <div class="topbar-right">
+      <div class="topbar-updated" id="lastUpdated">Last updated: —</div>
+    </div>
+  </div>
+
+  <!-- ==================== TABS + FILTERS ==================== -->
+  <div class="tabs-bar">
+    <div class="tabs">
+      <div class="tab active" onclick="switchView('daily')">Daily</div>
+      <div class="tab" onclick="switchView('weekly')">Weekly</div>
+      <div class="tab" onclick="switchView('monthly')">Monthly</div>
+    </div>
+
+    <div class="filter-bar">
+      <!-- Period A selector -->
+      <div class="date-nav">
+        <button class="date-arrow" onclick="navigate(-1)">&#8249;</button>
+        <div class="date-display" id="dateDisplay">—</div>
+        <button class="date-arrow" onclick="navigate(1)">&#8250;</button>
+      </div>
+
+      <!-- Compare toggle -->
+      <div class="compare-toggle" id="compareToggle" onclick="toggleCompare()">
+        <div class="toggle-switch"></div>
+        Compare
+      </div>
+
+      <!-- Period B selector (hidden until compare is on) -->
+      <div class="compare-picker" id="comparePicker">
+        <span class="compare-vs">vs</span>
+        <div class="date-nav">
+          <button class="date-arrow" onclick="navigateB(-1)">&#8249;</button>
+          <div class="date-display" id="dateDisplayB">—</div>
+          <button class="date-arrow" onclick="navigateB(1)">&#8250;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <div class="content" id="mainContent">
+    <!-- Rendered dynamically by JS -->
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <div class="footer">
+    Auto-generated from TimeDoctor data · <span>Alpha Direct</span> productivity system
+  </div>
+
+  <script>
+    // =================================================================
+    // DATA
+    // =================================================================
+    // No sample data — all data loaded from data.json
+    const EMPTY_DATA = {
+      lastUpdated: "",
+      target: 7,
+      days: []
+    };
+
+    // =================================================================
+    // STATE
+    // =================================================================
+    let currentView = 'daily';
+    let currentIndex = 0;
+    let compareIndex = 0;
+    let compareOn = false;
+    let data = EMPTY_DATA;
+
+    // =================================================================
+    // INIT
+    // =================================================================
+    function init() {
+      currentIndex = data.days.length - 1;
+      compareIndex = Math.max(0, currentIndex - 1);
+      document.getElementById('lastUpdated').textContent =
+        'Last updated: ' + formatDateLong(data.lastUpdated.split('T')[0]);
+      render();
+    }
+
+    // =================================================================
+    // NAVIGATION
+    // =================================================================
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (view === 'daily') {
+        currentIndex = data.days.length - 1;
+      } else if (view === 'weekly') {
+        currentIndex = getWeeks().length - 1;
+      } else {
+        currentIndex = getMonths().length - 1;
+      }
+
+      compareIndex = Math.max(0, currentIndex - 1);
+      render();
+    }
+
+    function navigate(dir) {
+      const max = getMaxIndex();
+      currentIndex = Math.max(0, Math.min(max, currentIndex + dir));
+      render();
+    }
+
+    function navigateB(dir) {
+      const max = getMaxIndex();
+      compareIndex = Math.max(0, Math.min(max, compareIndex + dir));
+      render();
+    }
+
+    function toggleCompare() {
+      compareOn = !compareOn;
+      document.getElementById('compareToggle').classList.toggle('active', compareOn);
+      document.getElementById('comparePicker').classList.toggle('visible', compareOn);
+      render();
+    }
+
+    function getMaxIndex() {
+      if (currentView === 'daily')  return data.days.length - 1;
+      if (currentView === 'weekly') return getWeeks().length - 1;
+      return getMonths().length - 1;
+    }
+
+    // =================================================================
+    // DATE HELPERS
+    // =================================================================
+    function formatDateShort(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function formatDateLong(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function pct(hit, total) {
+      return total > 0 ? Math.round((hit / total) * 100) : 0;
+    }
+
+    // =================================================================
+    // AGGREGATION
+    // =================================================================
+    function getWeeks() {
+      const weeks = [];
+      let current = [];
+      data.days.forEach(d => {
+        const dow = new Date(d.date + 'T00:00:00').getDay();
+        if (dow === 1 && current.length > 0) {
+          weeks.push(current);
+          current = [];
+        }
+        current.push(d);
+      });
+      if (current.length > 0) weeks.push(current);
+      return weeks;
+    }
+
+    function getMonths() {
+      const months = {};
+      data.days.forEach(d => {
+        const key = d.date.substring(0, 7);
+        if (!months[key]) months[key] = [];
+        months[key].push(d);
+      });
+      return Object.entries(months).map(([key, days]) => ({ month: key, days }));
+    }
+
+    function aggregateDays(days) {
+      const totalActive = days.reduce((s, d) => s + d.active, 0);
+      const totalHit    = days.reduce((s, d) => s + d.hitTarget, 0);
+      const avgMinutes  = Math.round(days.reduce((s, d) => s + d.avgMinutes, 0) / days.length);
+      const avgHours    = Math.floor(avgMinutes / 60) + 'h ' + String(avgMinutes % 60).padStart(2, '0') + 'm';
+      const avgNotTracked  = Math.round(days.reduce((s, d) => s + d.notTracked, 0) / days.length);
+      const avgLateStarts  = Math.round(days.reduce((s, d) => s + d.lateStarts, 0) / days.length);
+      const hitPct = pct(totalHit, totalActive);
+
+      // Aggregate departments
+      const deptTotals = {};
+      const deptCounts = {};
+      days.forEach(d => {
+        if (d.departments) {
+          Object.entries(d.departments).forEach(([dept, val]) => {
+            deptTotals[dept] = (deptTotals[dept] || 0) + val;
+            deptCounts[dept] = (deptCounts[dept] || 0) + 1;
+          });
+        }
+      });
+      const departments = {};
+      Object.keys(deptTotals).forEach(dept => {
+        departments[dept] = Math.round(deptTotals[dept] / deptCounts[dept]);
+      });
+
+      // Frequent flags
+      const flagCounts = {};
+      days.forEach(d => {
+        [...(d.needsAttention || []), ...(d.watchList || [])].forEach(p => {
+          flagCounts[p.name] = (flagCounts[p.name] || 0) + 1;
+        });
+      });
+      const repeatFlags = Object.entries(flagCounts)
+        .filter(([_, count]) => count >= Math.ceil(days.length * 0.5))
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name, count]) => ({ name, count, total: days.length }));
+
+      return {
+        hitPct, avgHours, avgMinutes,
+        avgActive: Math.round(totalActive / days.length),
+        avgNotTracked, avgLateStarts,
+        departments, repeatFlags,
+        days: days.length
+      };
+    }
+
+    // =================================================================
+    // RENDER — Main dispatcher
+    // =================================================================
+    function render() {
+      const container = document.getElementById('mainContent');
+
+      if (currentView === 'daily') {
+        renderDaily(container);
+      } else if (currentView === 'weekly') {
+        renderWeekly(container);
+      } else {
+        renderMonthly(container);
+      }
+    }
+
+    // =================================================================
+    // RENDER — Daily view
+    // =================================================================
+    function renderDaily(container) {
+      const day  = data.days[currentIndex];
+      const prev = currentIndex > 0 ? data.days[currentIndex - 1] : null;
+      const dayB = compareOn ? data.days[compareIndex] : null;
+
+      document.getElementById('dateDisplay').textContent = formatDateShort(day.date);
+      if (dayB) {
+        document.getElementById('dateDisplayB').textContent = formatDateShort(dayB.date);
+      }
+
+      const hitPct  = pct(day.hitTarget, day.active);
+      const prevPct = prev ? pct(prev.hitTarget, prev.active) : hitPct;
+      const diff    = hitPct - prevPct;
+
+      const trendClass = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-same';
+      const trendText  = diff > 0
+        ? `↑ ${diff}% vs previous day`
+        : diff < 0
+          ? `↓ ${Math.abs(diff)}% vs previous day`
+          : 'No change';
+
+      let html = '';
+
+      // — Hero section —
+      if (compareOn && dayB) {
+        const hitPctB = pct(dayB.hitTarget, dayB.active);
+        html += `
+          <div class="hero-compare">
+            <div class="hero-compare-card">
+              <span class="period-badge badge-a">A</span>
+              <div class="hero-inner">
+                <div class="hero-pct">${hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">hit 7h target · ${formatDateShort(day.date)}</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-compare-card">
+              <span class="period-badge badge-b">B</span>
+              <div class="hero-inner">
+                <div class="hero-pct hero-pct-orange">${hitPctB}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">hit 7h target · ${formatDateShort(dayB.date)}</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="hero-row">
+            <div class="hero-card">
+              <div class="hero-inner">
+                <div class="hero-pct">${hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">of active staff hit the 7h target</div>
+                  <div class="hero-trend ${trendClass}">${trendText}</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // — Stat cards —
+      if (compareOn && dayB) {
+        html += `
+          <div class="stats-row">
+            ${statCardCompare('Active Staff', day.active, dayB.active)}
+            ${statCardCompare('Avg Hours', day.avgHours, dayB.avgHours)}
+            ${statCardCompare('Not Tracked', day.notTracked, dayB.notTracked, true)}
+            ${statCardCompare('Late Starts', day.lateStarts, dayB.lateStarts, true)}
+          </div>`;
+      } else {
+        html += `
+          <div class="stats-row">
+            ${statCard(day.active, 'Active Staff', 'tracked time')}
+            ${statCard(day.avgHours, 'Avg Hours', prev ? (day.avgMinutes > prev.avgMinutes ? '↑' : '↓') + ' from ' + prev.avgHours : '')}
+            ${statCard(day.notTracked, 'Did Not Track', 'may be on leave')}
+            ${statCard(day.lateStarts, 'Late Starts', 'after 9:00 AM')}
+          </div>`;
+      }
+
+      // — Needs Attention + Watch List —
+      html += `
+        <div class="two-col">
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-dot dot-red"></div>
+              <div class="section-title">Needs Attention</div>
+              <div class="section-count">${day.needsAttention.length}</div>
+            </div>
+            ${personTable(day.needsAttention, 'attention')}
+          </div>
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-dot dot-orange"></div>
+              <div class="section-title">Watch List</div>
+              <div class="section-count">${day.watchList.length} staff</div>
+            </div>
+            ${personTable(day.watchList, 'watch')}
+          </div>
+        </div>`;
+
+      // — vs Previous Day —
+      if (!compareOn && prev) {
+        const prevHitPct = pct(prev.hitTarget, prev.active);
+        html += `
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-dot dot-navy"></div>
+              <div class="section-title">vs Previous Day</div>
+            </div>
+            <div class="comp-box">
+              ${compRow('Target hit rate', prevHitPct + '%', hitPct + '%', hitPct >= prevHitPct)}
+              ${compRow('Average hours', prev.avgHours, day.avgHours, day.avgMinutes >= prev.avgMinutes)}
+              ${compRow('Staff needing attention', prev.needsAttention.length, day.needsAttention.length, day.needsAttention.length <= prev.needsAttention.length)}
+              ${compRow('Did not track', prev.notTracked, day.notTracked, day.notTracked <= prev.notTracked)}
+            </div>
+          </div>`;
+      }
+
+      // — Did Not Track —
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-gray"></div>
+            <div class="section-title">Did Not Track</div>
+            <div class="section-count">${day.notTracked} staff</div>
+          </div>
+          <div class="no-track-names">${day.didNotTrack}</div>
+        </div>`;
+
+      container.innerHTML = html;
+    }
+
+    // =================================================================
+    // RENDER — Weekly view
+    // =================================================================
+    function renderWeekly(container) {
+      const weeks    = getWeeks();
+      const week     = weeks[currentIndex] || weeks[weeks.length - 1];
+      const prevWeek = currentIndex > 0 ? weeks[currentIndex - 1] : null;
+      const weekB    = compareOn && weeks[compareIndex] ? weeks[compareIndex] : null;
+
+      const agg     = aggregateDays(week);
+      const aggPrev = prevWeek ? aggregateDays(prevWeek) : null;
+      const aggB    = weekB ? aggregateDays(weekB) : null;
+
+      const weekLabel = formatDateShort(week[0].date) + ' — ' + formatDateShort(week[week.length - 1].date);
+      document.getElementById('dateDisplay').textContent = weekLabel;
+      if (weekB) {
+        document.getElementById('dateDisplayB').textContent =
+          formatDateShort(weekB[0].date) + ' — ' + formatDateShort(weekB[weekB.length - 1].date);
+      }
+
+      const diff = aggPrev ? agg.hitPct - aggPrev.hitPct : 0;
+      const trendClass = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-same';
+      const trendText  = diff > 0
+        ? `↑ ${diff}% vs previous week`
+        : diff < 0
+          ? `↓ ${Math.abs(diff)}% vs previous week`
+          : 'No change';
+
+      let html = '';
+
+      // — Hero —
+      if (compareOn && aggB) {
+        html += `
+          <div class="hero-compare">
+            <div class="hero-compare-card">
+              <span class="period-badge badge-a">A</span>
+              <div class="hero-inner">
+                <div class="hero-pct">${agg.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">avg daily target hit rate</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-compare-card">
+              <span class="period-badge badge-b">B</span>
+              <div class="hero-inner">
+                <div class="hero-pct hero-pct-orange">${aggB.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">avg daily target hit rate</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="hero-row">
+            <div class="hero-card">
+              <div class="hero-inner">
+                <div class="hero-pct">${agg.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">average daily target hit rate this week</div>
+                  <div class="hero-trend ${trendClass}">${trendText}</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // — Stats —
+      html += `
+        <div class="stats-row">
+          ${statCard(agg.avgHours, 'Weekly Avg Hours', 'per active staff per day')}
+          ${statCard(agg.repeatFlags.length, 'Repeat Flags', 'flagged 50%+ of days')}
+          ${statCard(agg.avgNotTracked, 'Avg Not Tracked', 'per day')}
+          ${statCard(agg.avgLateStarts, 'Avg Late Starts', 'per day')}
+        </div>`;
+
+      // — Daily chart —
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-navy"></div>
+            <div class="section-title">Daily Target Hit Rate</div>
+          </div>`;
+
+      if (compareOn && weekB) {
+        html += `
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot legend-dot-navy"></div>Period A</div>
+            <div class="legend-item"><div class="legend-dot legend-dot-orange"></div>Period B</div>
+          </div>`;
+        html += renderCompareChart(week, weekB);
+      } else {
+        html += renderChart(week);
+      }
+      html += `</div>`;
+
+      // — Departments + Repeat Flags —
+      html += `<div class="two-col">`;
+
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-navy"></div>
+            <div class="section-title">By Department</div>
+          </div>
+          ${compareOn && aggB ? renderDeptBarsCompare(agg.departments, aggB.departments) : renderDeptBars(agg.departments)}
+        </div>`;
+
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-red"></div>
+            <div class="section-title">Repeat Flags</div>
+            <div class="section-count">Flagged frequently</div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Days Flagged</th></tr></thead>
+            <tbody>
+              ${agg.repeatFlags.length > 0
+                ? agg.repeatFlags.map(f =>
+                    `<tr><td class="name-cell">${f.name}</td><td class="hours-cell">${f.count} / ${f.total}</td></tr>`
+                  ).join('')
+                : `<tr><td colspan="2" class="empty-table-msg">No repeat flags this week</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>`;
+
+      html += `</div>`;
+
+      container.innerHTML = html;
+    }
+
+    // =================================================================
+    // RENDER — Monthly view
+    // =================================================================
+    function renderMonthly(container) {
+      const months    = getMonths();
+      const month     = months[currentIndex] || months[months.length - 1];
+      const prevMonth = currentIndex > 0 ? months[currentIndex - 1] : null;
+      const monthB    = compareOn && months[compareIndex] ? months[compareIndex] : null;
+
+      const agg     = aggregateDays(month.days);
+      const aggPrev = prevMonth ? aggregateDays(prevMonth.days) : null;
+      const aggB    = monthB ? aggregateDays(monthB.days) : null;
+
+      const mDate      = new Date(month.month + '-01T00:00:00');
+      const monthLabel = mDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      document.getElementById('dateDisplay').textContent = monthLabel;
+
+      if (monthB) {
+        const mbDate = new Date(monthB.month + '-01T00:00:00');
+        document.getElementById('dateDisplayB').textContent =
+          mbDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      }
+
+      const diff = aggPrev ? agg.hitPct - aggPrev.hitPct : 0;
+      const trendClass = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-same';
+      const trendText  = aggPrev
+        ? (diff > 0 ? `↑ ${diff}% vs previous month` : diff < 0 ? `↓ ${Math.abs(diff)}% vs previous month` : 'No change')
+        : 'First month';
+
+      let html = '';
+
+      // — Hero —
+      if (compareOn && aggB) {
+        html += `
+          <div class="hero-compare">
+            <div class="hero-compare-card">
+              <span class="period-badge badge-a">A</span>
+              <div class="hero-inner">
+                <div class="hero-pct">${agg.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">avg daily target hit rate · ${monthLabel}</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-compare-card">
+              <span class="period-badge badge-b">B</span>
+              <div class="hero-inner">
+                <div class="hero-pct hero-pct-orange">${aggB.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">avg daily target hit rate</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="hero-row">
+            <div class="hero-card">
+              <div class="hero-inner">
+                <div class="hero-pct">${agg.hitPct}%</div>
+                <div class="hero-meta">
+                  <div class="hero-label">average daily target hit rate — ${monthLabel}</div>
+                  <div class="hero-trend ${trendClass}">${trendText}</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // — Stats —
+      html += `
+        <div class="stats-row">
+          ${statCard(agg.avgHours, 'Monthly Avg', 'across all active staff')}
+          ${statCard(agg.days, 'Working Days', 'tracked this month')}
+          ${statCard(agg.repeatFlags.length, 'Watch List', 'flagged frequently')}
+          ${statCard(agg.avgNotTracked, 'Avg Not Tracked', 'per day')}
+        </div>`;
+
+      // — Weekly breakdown chart —
+      const weeks = [];
+      let cur = [];
+      month.days.forEach(d => {
+        const dow = new Date(d.date + 'T00:00:00').getDay();
+        if (dow === 1 && cur.length > 0) {
+          weeks.push(cur);
+          cur = [];
+        }
+        cur.push(d);
+      });
+      if (cur.length > 0) weeks.push(cur);
+
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-navy"></div>
+            <div class="section-title">Weekly Breakdown</div>
+          </div>
+          <div class="chart-area">
+            <div class="chart-bars">
+              ${weeks.map((w, i) => {
+                const wAgg  = aggregateDays(w);
+                const h     = Math.max(10, wAgg.hitPct);
+                const isLast = i === weeks.length - 1;
+                return `
+                  <div class="chart-col">
+                    <div class="chart-pct">${wAgg.hitPct}%</div>
+                    <div class="chart-bar ${isLast ? 'chart-bar-orange' : 'chart-bar-navy'}" style="height:${h}%"></div>
+                  </div>`;
+              }).join('')}
+            </div>
+            <div class="chart-label-row">
+              ${weeks.map((w, i) => {
+                const isLast = i === weeks.length - 1;
+                return `<div class="chart-label ${isLast ? 'today' : ''}">Wk ${i + 1}</div>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>`;
+
+      // — Department + Watch List —
+      html += `<div class="two-col">`;
+
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-navy"></div>
+            <div class="section-title">Department Performance</div>
+          </div>
+          ${compareOn && aggB ? renderDeptBarsCompare(agg.departments, aggB.departments) : renderDeptBars(agg.departments)}
+        </div>`;
+
+      html += `
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-dot dot-red"></div>
+            <div class="section-title">Monthly Watch List</div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Days Flagged</th></tr></thead>
+            <tbody>
+              ${agg.repeatFlags.length > 0
+                ? agg.repeatFlags.map(f =>
+                    `<tr><td class="name-cell">${f.name}</td><td class="hours-cell">${f.count} / ${f.total}</td></tr>`
+                  ).join('')
+                : `<tr><td colspan="2" class="empty-table-msg">No repeat flags this month</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>`;
+
+      html += `</div>`;
+
+      // — vs Previous Month —
+      if (!compareOn && aggPrev) {
+        html += `
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-dot dot-navy"></div>
+              <div class="section-title">vs Previous Month</div>
+            </div>
+            <div class="comp-box">
+              ${compRow('Target hit rate', aggPrev.hitPct + '%', agg.hitPct + '%', agg.hitPct >= aggPrev.hitPct)}
+              ${compRow('Average hours', aggPrev.avgHours, agg.avgHours, agg.avgMinutes >= aggPrev.avgMinutes)}
+              ${compRow('Watch list size', aggPrev.repeatFlags.length, agg.repeatFlags.length, agg.repeatFlags.length <= aggPrev.repeatFlags.length)}
+            </div>
+          </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // =================================================================
+    // COMPONENT HELPERS
+    // =================================================================
+    function statCard(value, label, sub) {
+      return `
+        <div class="stat-card">
+          <div class="stat-card-value">${value}</div>
+          <div class="stat-card-label">${label}</div>
+          <div class="stat-card-sub">${sub}</div>
+        </div>`;
+    }
+
+    function statCardCompare(label, valA, valB, lowerIsBetter = false) {
+      return `
+        <div class="stat-card">
+          <div class="stat-compare-row">
+            <div class="stat-card-value">${valA}</div>
+            <span class="stat-compare-vs">vs ${valB}</span>
+          </div>
+          <div class="stat-card-label">${label}</div>
+        </div>`;
+    }
+
+    function personTable(list, type) {
+      if (!list || list.length === 0) {
+        return '<div class="empty-table-msg">None</div>';
+      }
+
+      const rows = list.map(p => {
+        const dept = p.dept ? `<span class="dept-tag">${p.dept}</span>` : '';
+        const pillClass = type === 'attention'
+          ? (p.issue === 'Critical' ? 'pill-red' : 'pill-orange')
+          : 'pill-blue';
+        const pillText = type === 'attention' ? p.issue : p.shortfall;
+
+        return `
+          <tr>
+            <td class="name-cell">${p.name}${dept}</td>
+            <td class="hours-cell">${p.hours}</td>
+            <td class="issue-cell"><span class="pill ${pillClass}">${pillText}</span></td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Hours</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function compRow(label, oldVal, newVal, isGood) {
+      const cls   = isGood ? 'up' : 'down';
+      const arrow = isGood ? '↑' : '↓';
+      return `
+        <div class="comp-row">
+          <div class="comp-label">${label}</div>
+          <div class="comp-vals">
+            <span class="comp-old">${oldVal}</span>
+            <span class="comp-arrow">→</span>
+            <span class="comp-new ${cls}">${newVal} ${arrow}</span>
+          </div>
+        </div>`;
+    }
+
+    // =================================================================
+    // CHART HELPERS
+    // =================================================================
+    function renderChart(days) {
+      const bars = days.map((d, i) => {
+        const p      = pct(d.hitTarget, d.active);
+        const isLast = i === days.length - 1;
+        return `
+          <div class="chart-col">
+            <div class="chart-pct">${p}%</div>
+            <div class="chart-bar ${isLast ? 'chart-bar-orange' : 'chart-bar-navy'}" style="height:${Math.max(10, p)}%"></div>
+          </div>`;
+      }).join('');
+
+      const labels = days.map((d, i) => {
+        const isLast  = i === days.length - 1;
+        const dayName = new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short' });
+        return `<div class="chart-label ${isLast ? 'today' : ''}">${dayName}</div>`;
+      }).join('');
+
+      return `
+        <div class="chart-area">
+          <div class="chart-bars">${bars}</div>
+          <div class="chart-label-row">${labels}</div>
+        </div>`;
+    }
+
+    function renderCompareChart(daysA, daysB) {
+      const maxLen = Math.max(daysA.length, daysB.length);
+      let bars   = '';
+      let labels = '';
+
+      for (let i = 0; i < maxLen; i++) {
+        const pA = daysA[i] ? pct(daysA[i].hitTarget, daysA[i].active) : 0;
+        const pB = daysB[i] ? pct(daysB[i].hitTarget, daysB[i].active) : 0;
+        const d  = daysA[i] || daysB[i];
+        const dayName = d
+          ? new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short' })
+          : '';
+
+        bars += `
+          <div class="chart-col">
+            <div class="chart-pct chart-pct-sm">${pA}/${pB}</div>
+            <div class="chart-bar-group">
+              <div class="chart-bar chart-bar-navy" style="height:${Math.max(5, pA)}%"></div>
+              <div class="chart-bar chart-bar-orange" style="height:${Math.max(5, pB)}%"></div>
+            </div>
+          </div>`;
+        labels += `<div class="chart-label">${dayName}</div>`;
+      }
+
+      return `
+        <div class="chart-area">
+          <div class="chart-bars">${bars}</div>
+          <div class="chart-label-row">${labels}</div>
+        </div>`;
+    }
+
+    // =================================================================
+    // DEPARTMENT BAR HELPERS
+    // =================================================================
+    function renderDeptBars(depts) {
+      const sorted = Object.entries(depts).sort((a, b) => b[1] - a[1]);
+      return sorted.map(([name, val]) => {
+        const color = val >= 80 ? '#059669'
+                    : val >= 70 ? '#0B0B3B'
+                    : val >= 60 ? '#D97706'
+                    :             '#DC2626';
+        return `
+          <div class="dept-row">
+            <div class="dept-name">${name}</div>
+            <div class="dept-bar-bg">
+              <div class="dept-bar-fill" style="width:${val}%; background:${color}"></div>
+            </div>
+            <div class="dept-pct">${val}%</div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderDeptBarsCompare(deptsA, deptsB) {
+      const allDepts = [...new Set([...Object.keys(deptsA), ...Object.keys(deptsB)])];
+      allDepts.sort((a, b) => (deptsA[b] || 0) - (deptsA[a] || 0));
+
+      let html = `
+        <div class="chart-legend" style="padding:0 0 12px">
+          <div class="legend-item"><div class="legend-dot legend-dot-navy"></div>Period A</div>
+          <div class="legend-item"><div class="legend-dot legend-dot-orange"></div>Period B</div>
+        </div>`;
+
+      html += allDepts.map(name => {
+        const valA = deptsA[name] || 0;
+        const valB = deptsB[name] || 0;
+        return `
+          <div class="dept-row">
+            <div class="dept-name">${name}</div>
+            <div class="dept-bars-container">
+              <div class="dept-bar-bg">
+                <div class="dept-bar-fill" style="width:${valA}%; background:#0B0B3B"></div>
+              </div>
+              <div class="dept-bar-bg">
+                <div class="dept-bar-fill" style="width:${valB}%; background:#F07F00"></div>
+              </div>
+            </div>
+            <div class="dept-pct">${valA}/${valB}</div>
+          </div>`;
+      }).join('');
+
+      return html;
+    }
+
+    // =================================================================
+    // BOOT — Load data from data.json, show empty state if no data yet
+    // =================================================================
+    async function loadData() {
+      try {
+        const response = await fetch('data.json?' + Date.now());
+        const jsonData = await response.json();
+        if (jsonData.days && jsonData.days.length > 0) {
+          data = jsonData;
+          init();
+        } else {
+          showEmptyState();
+        }
+      } catch (e) {
+        console.error('Failed to load data.json:', e);
+        showEmptyState();
+      }
+    }
+
+    function showEmptyState() {
+      document.getElementById('lastUpdated').textContent = 'Awaiting first data push';
+      document.getElementById('mainContent').innerHTML = `
+        <div style="text-align:center;padding:80px 20px;color:#9CA3AF;">
+          <div style="font-size:48px;margin-bottom:16px;">📊</div>
+          <div style="font-size:18px;font-weight:600;color:#374151;margin-bottom:8px;">No data yet</div>
+          <div style="font-size:13px;max-width:400px;margin:0 auto;line-height:1.6;">
+            This dashboard will populate automatically once the first daily analysis is pushed.
+            Check back after the first Cowork run.
+          </div>
+        </div>`;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
